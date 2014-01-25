@@ -1,4 +1,2 @@
-aed
-===
-
-Andre's Emacs.D. Very much a work in progress.
+custom.el
+init.el is OPT-IN

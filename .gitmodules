@@ -1,0 +1,3 @@
+[submodule "emacs-vim-modeline"]
+	path = emacs-vim-modeline
+	url = http://github.com/cinsk/emacs-vim-modeline.git
