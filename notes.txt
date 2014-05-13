@@ -1,0 +1,24 @@
+C/C++ completion:
+* complete solutions:
+  * company-mode
+  * irony-mode
+  * rtags
+* front-ends:
+  * autocomplete + yasnippet
+* autocomplete sources:
+  * ctags
+  * etags
+  * clang
+  * clang-async
+  * semantic (cedet)
+
+Python completion:
+* Jedi
+
+JavaScript completion:
+
+Symbol browsing:
+* speedbar
+* imenu
+* helm
+* anything
