@@ -208,7 +208,12 @@ With argument ARG and region inactive, do this that many times."
   (setq ido-use-filename-at-point 'guess)
   (setq ido-create-new-buffer 'always)
   (setq ido-enable-last-directory-history nil)
-  (add-to-list 'ido-ignore-files "\\.DS_Store"))
+  (add-to-list 'ido-ignore-files "\\.DS_Store")
+  (aed/require-package 'ido-ubiquitous)
+  (ido-ubiquitous))
+
+(defun aed/writegood ()
+  (aed/require-package 'writegood-mode))
 
 (defun aed/console-no-menu-bar ()
   "Disable the menu bar if we're running in the console."
@@ -410,7 +415,8 @@ With argument ARG and region inactive, do this that many times."
 
 (defun aed/rebind-M-semicolon-toggle-line-comment ()
   "Remap M-; to comment out the current line if it's uncommented, or uncomment the line if it is commented."
-  (global-set-key (kbd "M-;") 'aed/toggle-line-comment))
+  (global-set-key (kbd "M-;") 'aed/toggle-line-comment)
+  (global-set-key (kbd "s-/") 'aed/toggle-line-comment))
 
 (defun aed/save-before-compile ()
   (setq compilation-ask-about-save nil))
@@ -508,10 +514,24 @@ For more info:
 
 (defun aed/company-mode ()
   (aed/require-package 'company)
-  (add-hook 'after-init-hook 'global-company-mode))
+  (add-hook 'after-init-hook 'global-company-mode)
+
+  (defun company-dabbrev-case-sensitive (command &optional arg &rest ignored)
+    "dabbrev-like `company-mode' completion back-end; case-sensitive."
+    (interactive (list 'interactive))
+    (case command
+      (interactive (company-begin-backend 'company-dabbrev))
+      (prefix (company-grab-word))
+      (candidates
+               (company-dabbrev--search (company-dabbrev--make-regexp arg)
+                                        company-dabbrev-time-limit
+                                        company-dabbrev-other-buffers))
+      (duplicates t)))
+
+  (provide 'company-dabbrev-case-sensitive))
 
 (defun aed/keyfreq ()
-  (require 'keyfreq)
+  (aed/require-package 'keyfreq)
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
 
@@ -656,7 +676,12 @@ For more info:
   (aed/require-package 'magit))
 
 (defun aed/require-markdown-mode ()
-  (aed/require-package 'markdown-mode))
+  (aed/require-package 'markdown-mode)
+  ;; leave my meta arrow keys alone, please!
+  (define-key markdown-mode-map (kbd "M-<up>") nil)
+  (define-key markdown-mode-map (kbd "M-<down>") nil)
+  (define-key markdown-mode-map (kbd "M-<left>") nil)
+  (define-key markdown-mode-map (kbd "M-<right>") nil))
 
 (defun aed/rainbow-delimeters ()
   (aed/require-package 'rainbow-delimiters)
@@ -674,6 +699,83 @@ For more info:
 
 (defun aed/indicate-empty-lines ()
   (setq-default indicate-empty-lines t))
+
+(defun aed/diff-hl ()
+  (aed/require-package 'diff-hl)
+  (global-diff-hl-mode))
+
+(defun aed/binary-line-move ()
+  (lexical-let ((beg -1)
+                (end -1)
+                (prev-mid -1))
+
+    (defun backward-binary ()
+      (interactive)
+      (if (/= prev-mid (point))
+          (setq beg -1 end -1)
+        (setq end prev-mid))
+      (if (< beg 0) (setq beg (line-beginning-position)
+                          end (point)))
+      (setq prev-mid (/ (+ beg end) 2))
+      (goto-char prev-mid))
+
+    (defun forward-binary ()
+      (interactive)
+      (if (/= prev-mid (point))
+          (setq beg -1 end -1)
+        (setq beg prev-mid))
+      (if (< end 0) (setq beg (point)
+                          end (line-end-position)))
+      (setq prev-mid (/ (+ beg end ) 2))
+      (goto-char prev-mid))
+    )
+
+  (global-set-key (kbd "M-9") 'backward-binary)
+  (global-set-key (kbd "M-0") 'forward-binary))
+
+(defun aed/binary-line-move ()
+  (lexical-let ((beg -1)
+                (end -1)
+                (prev-mid -1))
+
+    (defun backward-binary ()
+      (interactive)
+      (if (/= prev-mid (point))
+          (setq beg -1 end -1)
+        (setq end prev-mid))
+      (if (< beg 0) (setq beg (line-beginning-position)
+                          end (point)))
+      (setq prev-mid (/ (+ beg end) 2))
+      (goto-char prev-mid))
+
+    (defun forward-binary ()
+      (interactive)
+      (if (/= prev-mid (point))
+          (setq beg -1 end -1)
+        (setq beg prev-mid))
+      (if (< end 0) (setq beg (point)
+                          end (line-end-position)))
+      (setq prev-mid (/ (+ beg end ) 2))
+      (goto-char prev-mid))
+    )
+
+  (global-set-key (kbd "M-9") 'backward-binary)
+  (global-set-key (kbd "M-0") 'forward-binary))
+
+(defun aed/smooth-scroll ()
+  (aed/require-package 'sublimity)
+  (require 'sublimity)
+  (require 'sublimity-scroll)
+  (setq sublimity-scroll-weight 3
+        sublimity-scroll-drift-length 1)
+  (sublimity-mode 1))
+
+;; Functions
+
+(defun aed-edit ()
+  "Edit ~/.emacs.d/aed/init.el."
+  (interactive)
+  (find-file (concat aed-directory "init.el")))
 
 ;; enable features
 
@@ -729,11 +831,12 @@ For more info:
 (aed/ctrl-digits)
 (aed/navigate-windows-via-keyboard)
 (aed/adaptive-wrap)
-
-;; (aed/company-mode)
+(aed/writegood)
+(aed/company-mode)
 ;; (aed/auto-complete+yasnippet)
-(aed/irony-mode)
+;; (aed/irony-mode)
 
+(aed/diff-hl)
 (aed/keyfreq)
 (aed/smex)
 (aed/c-mode-hide-ifdefs)
@@ -748,6 +851,8 @@ For more info:
 (aed/rainbow-delimeters)
 (aed/detach-window)
 (aed/indicate-empty-lines)
+(aed/binary-line-move)
+(aed/smooth-scroll)
 
 ;; todo
 
