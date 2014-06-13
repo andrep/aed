@@ -852,7 +852,7 @@ For more info:
 (aed/detach-window)
 (aed/indicate-empty-lines)
 (aed/binary-line-move)
-(aed/smooth-scroll)
+;; (aed/smooth-scroll)
 
 ;; todo
 
