@@ -770,6 +770,9 @@ For more info:
         sublimity-scroll-drift-length 1)
   (sublimity-mode 1))
 
+(defun aed/isearch-backspace ()
+  (define-key isearch-mode-map [remap isearch-delete-char] 'isearch-del-char))
+
 ;; Functions
 
 (defun aed-edit ()
@@ -780,6 +783,7 @@ For more info:
 ;; enable features
 
 (aed/init-packages)
+(aed/isearch-backspace)
 (aed/use-shell-environment)
 (aed/fonts)
 (aed/saveplace)
